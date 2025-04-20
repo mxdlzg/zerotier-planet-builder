@@ -1,4 +1,4 @@
-name: zerotier-planet-builder
+name: zerotier-planet-builder-ghcr
 
 on:
   workflow_dispatch
