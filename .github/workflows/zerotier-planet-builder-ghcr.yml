@@ -1,0 +1,23 @@
+name: zerotier-planet-builder
+
+on:
+  workflow_dispatch
+        
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Edit the planet IP
+      run: sed -i "s/1.1.1.1/${{ secrets.IP }}/g" ./patch/patch.json
+    - name: Edit username and password
+      run: sed -i "s/admin/${{ secrets.USERNAME }}/g" ./init.sh && sed -i "s/zero-ui/${{ secrets.PASSWORD }}/g" ./init.sh
+    - name: Build the Zerotier Planet Docker image
+      run: docker build . --file Dockerfile --tag zerotier-planet
+    - name: Log in to GitHub Container Registry
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+    - name: Tag the Docker image
+      run: docker tag zerotier-planet ghcr.io/${{ github.repository_owner }}/zerotier-planet:latest
+    - name: Push the Docker image to GHCR
+      run: docker push ghcr.io/${{ github.repository_owner }}/zerotier-planet:latest
